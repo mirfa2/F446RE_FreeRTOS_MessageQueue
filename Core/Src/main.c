@@ -23,6 +23,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+	//Task1 and Task2 will write data to a shared struct and push it to a queue,
+	//then task3 will read the data from the queue and send it to pc via uart via printf()
+
+	//using Message Queue would prevent Race Condition (data corruption when multiple tasks can access it at the same time)
+	//every element/msg in the queue gets its own memory location, so the msg from different tasks dont overwrite each other.
+	//Queue is FIFO, but it also has Message Priority feature
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
