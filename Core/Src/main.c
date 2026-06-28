@@ -370,7 +370,7 @@ void StartTask1(void *argument)
 
 			//3rd param: message priority =0, no prio
 			//4th param: timeout; how long to wait for the queue to be free if its full {0, osDelay(x), osWaitForever}. if timeout, returns error and move on
-			osMessageQueuePut(MessageQueueHandle, &msg, 0, 0);
+			osMessageQueuePut(messageQueueHandle, &msg, 0, 0);
 
 			osDelay(200);	//deboucing delay, tho this isnt necessary because the user bt at pc13 is already connected to a lowpass filter, check schematic
 		}
@@ -401,7 +401,7 @@ void StartTask2(void *argument)
         msg.event_id   = 0x02;
         msg.timestamp = HAL_GetTick() / 1000; //timestamp in seconds
 
-        osMessageQueuePut(MessageQueueHandle, &msg, 0, 0);
+        osMessageQueuePut(messageQueueHandle, &msg, 0, 0);
 
         osDelay(1000);
     }
@@ -418,11 +418,24 @@ void StartTask2(void *argument)
 void StartTask3(void *argument)
 {
   /* USER CODE BEGIN StartTask3 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	//Task3 reads messages from the queue one at a time and prints them to the serial console
+
+	messageQueue_t msg;
+
+	/* Infinite loop */
+	for(;;)
+	{
+		//It uses osWaitForever so it blocks when the queue is empty and wakes up the moment a new message arrives.
+		//check status == osOK before printing. This ensures we only print when the read was successful
+		if (osMessageQueueGet(messageQueueHandle, &msg, 0, osWaitForever) == osOK)
+		{
+			printf ("Event ID: %d, Timestamp: %lu\n", msg.event_id, msg.timestamp);
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	//blinks when txing
+		}
+	    osDelay(1);
+	}
+
   /* USER CODE END StartTask3 */
 }
 
