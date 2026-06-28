@@ -112,7 +112,7 @@ void StartTask3(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//declare the struct to store the data, then go below at the queue creation to manually change the queue element (line 174)
+//declare the struct to store the data, then go below at the queue creation to manually change the queue element (line 181)
 typedef struct {
 	uint8_t event_id;			//from which task the struct is created 0x01 for task1 and 0x02 for task2
 	uint32_t timestamp;			//
@@ -356,11 +356,28 @@ static void MX_GPIO_Init(void)
 void StartTask1(void *argument)
 {
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	//Task 1 monitors the button on pin PC13. When pressed, it loads data into a messageQueue_t structure and pushes it into the queue.
+	messageQueue_t msg;
+
+	/* Infinite loop */
+	for(;;)
+	{
+		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET)
+		{
+			msg.event_id   = 0x01;	//UART can only send ASCII char data type, hexadec 0x01 == uint8_t 1 == char 1
+			msg.timestamp = HAL_GetTick();	//in ms, because RTOS tick rate set at 1khz
+
+			//3rd param: message priority =0, no prio
+			//4th param: timeout; how long to wait for the queue to be free if its full {0, osDelay(x), osWaitForever}. if timeout, returns error and move on
+			osMessageQueuePut(MessageQueueHandle, &msg, 0, 0);
+
+			osDelay(200);	//deboucing delay, tho this isnt necessary because the user bt at pc13 is already connected to a lowpass filter, check schematic
+		}
+		osDelay(20); //small delay like this also helps with not starving other tasks
+	}
+
+
   /* USER CODE END 5 */
 }
 
@@ -374,11 +391,20 @@ void StartTask1(void *argument)
 void StartTask2(void *argument)
 {
   /* USER CODE BEGIN StartTask2 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	//Task2 automatically sends a message to the queue every second
+    messageQueue_t msg;
+
+    /* Infinite loop */
+    for (;;)
+    {
+        msg.event_id   = 0x02;
+        msg.timestamp = HAL_GetTick() / 1000; //timestamp in seconds
+
+        osMessageQueuePut(MessageQueueHandle, &msg, 0, 0);
+
+        osDelay(1000);
+    }
   /* USER CODE END StartTask2 */
 }
 
