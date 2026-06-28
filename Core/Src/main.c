@@ -30,6 +30,12 @@
 	//every element/msg in the queue gets its own memory location, so the msg from different tasks dont overwrite each other.
 	//Queue is FIFO, but it also has Message Priority feature
 
+	//configs
+
+	//enable User_Button as GPIO input at PC13, use pullup resistor so default pin at high
+
+	//enable UART through STlink, USART2, standard UART config
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
