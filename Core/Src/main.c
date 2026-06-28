@@ -401,7 +401,11 @@ void StartTask2(void *argument)
         msg.event_id   = 0x02;
         msg.timestamp = HAL_GetTick() / 1000; //timestamp in seconds
 
-        osMessageQueuePut(messageQueueHandle, &msg, 0, 0);
+        //another approach other than the timeout is to check if the queue has space/not full before putting elements in
+        if(osMessageQueueGetSpace(Task2Handle)>0)
+        {
+        	osMessageQueuePut(messageQueueHandle, &msg, 0, 0);
+        }
 
         osDelay(1000);
     }
@@ -428,6 +432,7 @@ void StartTask3(void *argument)
 	{
 		//It uses osWaitForever so it blocks when the queue is empty and wakes up the moment a new message arrives.
 		//check status == osOK before printing. This ensures we only print when the read was successful
+		//we can also use if(osMessageQueueGetCount(Task2Handle)>0){...} approach, but it is still good to verify status
 		if (osMessageQueueGet(messageQueueHandle, &msg, 0, osWaitForever) == osOK)
 		{
 			printf ("Event ID: %d, Timestamp: %lu \r\n", msg.event_id, msg.timestamp);
