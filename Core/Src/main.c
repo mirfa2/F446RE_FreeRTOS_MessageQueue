@@ -45,6 +45,7 @@
 		//Item Size: size of the data/element being stored in the queue. In cubeMX we can only assign standard data type like uint32_t etc.
 		//	we are storing a struct as the queue element, which we will implement in this .c, see below
 
+#include "stdio.h"
 
 /* USER CODE END Includes */
 
@@ -111,6 +112,19 @@ void StartTask3(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//declare the struct to store the data, then go below at the queue creation to manually change the queue element (line 174)
+typedef struct {
+	uint8_t event_id;			//from which task the struct is created 0x01 for task1 and 0x02 for task2
+	uint32_t timestamp;			//
+} messageQueue_t;
+
+//Override to redirect printf output through USART2. Every time printf outputs a character, it calls __io_putchar() internally
+int __io_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -164,7 +178,7 @@ int main(void)
 
   /* Create the queue(s) */
   /* creation of messageQueue */
-  messageQueueHandle = osMessageQueueNew (10, sizeof(uint32_t), &messageQueue_attributes);
+  messageQueueHandle = osMessageQueueNew (10, sizeof(messageQueue_t), &messageQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
