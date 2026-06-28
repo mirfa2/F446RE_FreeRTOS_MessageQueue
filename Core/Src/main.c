@@ -430,7 +430,7 @@ void StartTask3(void *argument)
 		//check status == osOK before printing. This ensures we only print when the read was successful
 		if (osMessageQueueGet(messageQueueHandle, &msg, 0, osWaitForever) == osOK)
 		{
-			printf ("Event ID: %d, Timestamp: %lu\n", msg.event_id, msg.timestamp);
+			printf ("Event ID: %d, Timestamp: %lu \r\n", msg.event_id, msg.timestamp);
 			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	//blinks when txing
 		}
 	    osDelay(1);
